@@ -1,0 +1,26 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.form-item{
+    font-size:18px;
+}
+.ant-form-item .ant-form-item-label >label{
+    font-size:18px;
+    margin-right:250px;
+    margin-bottom:5px
+}
+.button-item {
+    font-size:16px;
+    height: 42px
+}
