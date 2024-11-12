@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react'
-import useUserStore from '../zusstand/userStore'
 import '../css/login.css'
 import { Button, Row, Col, Typography, Spin, Alert, Form, Input } from "antd";
 import { useNavigate } from 'react-router-dom';
+import userAPI from '../zusstand/userAPI';
 
 function Login() {
     const { Title, Text } = Typography;
-    const { users, FetchGetAllUser, FetchGetUserId, FetchCreateUser, isLoading, isError } = useUserStore()
     const navigator = useNavigate();
     const [customMessage, setCustomMessage] = useState('')
     const [customMessageErros, setCustomMessageErros] = useState('')
-
     const [isLogin, setIsLogin] = useState(true);
     const [userName, setUserName] = useState('');
     const [userNameErros, setUserNameErros] = useState('');
@@ -19,21 +17,20 @@ function Login() {
     const [rePassWord, setRePassWord] = useState('');
     const [rePassWordErros, setRePassWordErros] = useState('');
 
-    console.log(userName, passWord)
-
     const handleLogin = async () => {
+        const value = {username: userName, password: passWord}
         const isCheck = checkText(userName, passWord)
         if (!isCheck) {
             return;
         }
-        const data = await users;
-        const userId = data.id;
-        const user = data.find(u => u.username === userName && u.password === passWord);
-
+        const user = await userAPI.login(value);
+        console.log(user)
         if (user) {
             if (user.isFlag === false) {
-                console.log('Em thành công rồi')
-                navigator(`/home/${userId}`)
+                setTimeout(() => {
+                    console.log(`Đăng nhập thành công với tài khoản ${user.username}`);
+                    navigator(`/home`)
+                }, 1000);
             }
             else {
                 console.log("Tài khoản của bạn đã bị khoá, Vui lòng liên hệ admin");
@@ -48,15 +45,14 @@ function Login() {
         if (!isCheck) {
             return;
         }
-        const data = await users
         const newUser = { username: userName, password: passWord };
-        // data.username === newUser.username && data.password === newUser.password
-        const user = data.find(u => u.username === newUser.username)
-        if(user){
+        const data = await userAPI.login(newUser)
+        if(data){
+            
             setCustomMessageErros("Tài khoản đã tồn tại")
         }
         else{
-            await FetchCreateUser(newUser);
+            await userAPI.create(newUser);
             setCustomMessage("Đã tạo tài khoản thành công")
         }
     }
@@ -121,9 +117,6 @@ function Login() {
     const switchToLogup = () => {
         setIsLogin(false);
     }
-    useEffect(() => {
-        FetchGetAllUser()
-    }, [FetchGetAllUser])
 
     useEffect(() => {
         if (customMessage || customMessageErros) {
@@ -137,14 +130,11 @@ function Login() {
 
     return (
         <div className="login-container" style={{ width: '400px', padding: '25px', background: 'white', boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)', borderRadius: '8px', textAlign: 'center' }}>
-            {isLoading && <Spin tip="Đang tải..." />}
-            {isError && <Alert message={`${isError}`} type="error" showIcon />}
             {customMessageErros && <Alert message={`${customMessageErros}`} type="error" showIcon />}
             {customMessage && <Alert message={`${customMessage}`} type="success" showIcon />}
             <div className="form-container">
                 <Title level={3}>{isLogin ? 'ĐĂNG NHẬP' : 'ĐĂNG KÝ'}</Title>
-
-                <form onSubmit={e => e.preventDefault()}>
+                <Form onSubmit={e => e.preventDefault()}>
                     <Row gutter={[16]}>
                         {/* Tên đăng nhập */}
                         <Col span={24} className="input-group">
@@ -231,7 +221,7 @@ function Login() {
                             </>
                         )}
                     </Row>
-                </form>
+                </Form>
             </div>
         </div>
     )

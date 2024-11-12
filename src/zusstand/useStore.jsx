@@ -1,39 +1,39 @@
 import {create} from 'zustand'
 
-const APIuser = "https://67237c71493fac3cf24b0d97.mockapi.io/user"
+const API = "https://67237c71493fac3cf24b0d97.mockapi.io/"
 
-const useUserStore = create((set)=>({
-    users:[],
+const useStore = create((set)=>({
+    store:[],
     isLoading: false,
     isError:null,
 
     // get all user
-    FetchGetAllUser: async ()=>{
+    FetchGetAll: async (path)=>{
         set({isLoading:true,isError:null});
         try {
-            const repose = await fetch(APIuser);
+            const repose = await fetch(`${API}/${path}`);
             const data = repose.json();
-            set({users:data, isLoading:false})
+            set({store:data, isLoading:false})
         } catch (error) {
             set({isError:error.message,isLoading: false})
         }
     },
     // get user theo id
-    FetchGetUserId: async(id)=>{
+    FetchGetId: async(path, id)=>{
         set({isLoading:true, isError:null});
         try {
-            const repose = await fetch(`${APIuser}/${id}`)
+            const repose = await fetch(`${API}/${path}:${id}`)
             const data = repose.json();
-            set({users:data, isLoading:false});
+            set({store:data, isLoading:false});
         } catch (error) {
             set({isError:error.message,isLoading: false})
         }
     },
     //create user
-    FetchCreateUser: async (userData)=>{
+    FetchCreate: async (path,userData)=>{
         set({isLoading:true, isError:null});
         try {
-            const repose = await fetch(APIuser, {
+            const repose = await fetch(`${API}${path}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -41,40 +41,40 @@ const useUserStore = create((set)=>({
                 body: JSON.stringify(userData)
             });
             const newUser = await repose.json();
-            set((state)=>({users:[...state.users, newUser],isLoading:false}));
+            set((state)=>({store:[...state.store, newUser],isLoading:false}));
             return newUser
         } catch (error) {
             set({isError:error.message,isLoading: false})
         }
     },
     //update user
-    FetchUpdateUser: async(id ,userData) =>{
+    FetchUpdate: async(path ,userData, id) =>{
         set({isLoading:true, isError:null});
         try {
-            const repose = await fetch(`${APIuser}/${id}`, {
+            const repose = await fetch(`${API}/${path}:${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(userData)
             });
-            const updateUser = await repose.json();
+            const updateStore = await repose.json();
             set((state)=>({
-                users:state.users.map((user)=>(user.id === id ? updateUser:user)),
+                store:state.store.map((store)=>(store.id === id ? updateStore:store)),
                 isLoading:false
             }))
         } catch (error) {
             set({isError:error.message,isLoading: false})
         }
     },
-    FetchDeleteUser: async(id) =>{
+    FetchDelete: async(path, id) =>{
         set({isLoading:true, isError:null});
         try {
-            await fetch(`${APIuser}/${id}`,{
+            await fetch(`${API}/${path}:${id}`,{
                 method:'DELETE'
             });
             set((state)=>({
-                user:state.users.filter((user)=>(user.id !== id))
+                store:state.store.filter((store)=>(store.id !== id))
             }))
         } catch (error) {
             set({isError:error.message,isLoading: false})
@@ -82,4 +82,4 @@ const useUserStore = create((set)=>({
     }
 }))
 
-export default useUserStore;
+export default useStore;

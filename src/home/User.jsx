@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
-import useUserStore from '../zusstand/userStore'
+import userAPI from '../zusstand/userAPI'
 import '../css/login.css'
 import { Button, Row, Col, Typography, Spin, Alert, Form, Input } from "antd";
-import UserTable from '../table';
+import UserTable from '../component/table';
 
 const User = () => {
 
     const { Title, Text } = Typography;
-    const { users, FetchGetAllUser, FetchGetUserId, FetchCreateUser, FetchUpdateUser, FetchDeleteUser, isLoading, isError } = useUserStore()
     const [dataSource, setdataSource] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -28,6 +27,11 @@ const User = () => {
             key: 'username',
         },
         {
+            title: 'Trạng Thái',
+            dataIndex: 'situation',
+            key: 'situation',
+        },
+        {
             title: 'Chức năng',
             dataIndex: 'funtion',
             key: 'funtion',
@@ -36,18 +40,17 @@ const User = () => {
 
 
     useEffect(() => {
+        setLoading(true);
         const fetchData = async () => {
-            setLoading(true);
-            await FetchGetAllUser()
-            const data = await users;
-            console.log(data)
+            const data = await userAPI.getAll()
             const newData = data.map((user) => ({
                 id: user.id,
                 name: user.name,
                 username: user.username,
+                situation: user.isFlag ? "Khoá":"Không khoá",
                 funtion: (
                     <>
-                        <Button type="primary" onClick={() => { }}>Khoá</Button>
+                        <Button type="primary" onClick={() => { }}>{user.isFlag ? "Mở Khoá":"khoá"}</Button>
                         <Button type="default" onClick={() => { }}>Đổi mật khẩu</Button>
                     </>
                 )
@@ -60,7 +63,7 @@ const User = () => {
 
     return (
         <div>
-            {isLoading ? <Spin tip="Đang tải..." /> : <UserTable columns={columns} dataSource={dataSource} isLoading={loading} />}
+            {loading ? <Spin tip="Đang tải..." /> : <UserTable columns={columns} dataSource={dataSource} isLoading={loading} />}
         </div>
     )
 }
